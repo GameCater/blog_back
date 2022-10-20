@@ -1,19 +1,10 @@
-# blog_back
+# 博客后台
 
-## Project setup
-```
-npm install
-```
+## 依赖包
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## 主要目录文件
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## 疑惑
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+## 进度
+
