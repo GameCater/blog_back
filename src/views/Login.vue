@@ -42,10 +42,10 @@
         <!-- 按钮 -->
         <el-form-item>
           <el-button 
-            type="primary" 
-            @click="submitForm('loginForm')">提交
+            class="login_btn"
+            @click="submitForm('loginForm')">登录
           </el-button>
-          <el-button @click="resetForm('loginForm')">重置</el-button>
+          <!-- <el-button @click="resetForm('loginForm')">重置</el-button> -->
         </el-form-item>
       </el-form>
     </div>
@@ -142,6 +142,16 @@ export default {
         width: 60%;
         & .el-form-item:last-child {
           margin-bottom: 0;
+        }
+
+        .login_btn {
+          width: 100%;
+          background: linear-gradient(to left, #3a7bd5, #00d2ff);
+          color: #eee;
+          font-size: .9rem;
+          text-align: center;
+          font-weight: bold;
+          letter-spacing: .2em;
         }
       }
     }
