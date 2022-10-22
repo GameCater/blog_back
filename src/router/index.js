@@ -35,6 +35,11 @@ const routes = [
         component: () => import('@/components/ArticlesEdit.vue'),
       },
       {
+        path: 'articles/edit/:id',
+        name: 'articles_edit',
+        component: () => import('@/components/ArticlesEdit.vue'),
+      },
+      {
         path: 'articles/list',
         name: 'articles_list',
         component: () => import('@/components/ArticlesList.vue'),
@@ -46,6 +51,11 @@ const routes = [
       {
         path: 'tags/create',
         name: 'tags_create',
+        component: () => import('@/components/TagsEdit.vue'),
+      },
+      {
+        path: 'tags/edit/:id',
+        name: 'tags_edit',
         component: () => import('@/components/TagsEdit.vue'),
       },
       {
@@ -94,6 +104,11 @@ const routes = [
         name: 'users_list',
         component: () => import('@/components/UsersList.vue'),
       },
+      {
+        path: 'users/edit/:id',
+        name: 'users_edit',
+        component: () => import('@/components/UsersList.vue'),
+      },
     ],
     // 设置路由元信息 只有登录路由公开
   },
@@ -122,10 +137,12 @@ const router = new VueRouter({
   routes
 });
 
+import store from '@/store';
+
 // 配置全局路由守卫
 router.beforeEach((to, from, next) => {
-  // 目标路由不公开且本地缓存没token记录
-  if (!to.meta.isPublic && !localStorage.token) {
+  // 目标路由不公开且管理员未登录（直接通过路径访问，login路由除外）
+  if (!to.meta.isPublic && !store.state.IS_ONLINE) {
     next({ path: '/login' });
   } else {
     next();
