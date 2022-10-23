@@ -5,7 +5,7 @@ import store from './store'
 
 Vue.config.productionTip = false
 
-// 安装ui库
+// 安装ui库（之后按需引入）
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 Vue.use(ElementUI);

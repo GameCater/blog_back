@@ -8,7 +8,7 @@ export default new Vuex.Store({
     // 已登录管理员信息
     USER_INFO: null,
     // 是否在线
-    IS_ONLINE: false
+    IS_ONLINE: false,
   },
   getters: {
   },

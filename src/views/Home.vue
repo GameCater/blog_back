@@ -85,6 +85,11 @@
               <template slot="title">
                 <i class="el-icon-menu"></i>用户管理
               </template>
+              <el-menu-item index="/home/users/add">
+                <template slot="title">
+                  <i class="el-icon-tickets"></i>新增用户
+                </template>
+              </el-menu-item>
               <el-menu-item index="/home/users/list">
                 <template slot="title">
                   <i class="el-icon-tickets"></i>用户列表
@@ -141,7 +146,8 @@
         <!-- 内容展示区 -->
         <el-main>
           <!-- 二级导航出口 -->
-          <router-view></router-view>
+          <!-- 阻止多个路由共享同一个路由组件下的复用问题 -->
+          <router-view :key="$route.fullPath"></router-view>
         </el-main>
       </el-container>
     </el-container>

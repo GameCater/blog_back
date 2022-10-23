@@ -16,7 +16,7 @@
         <el-table-column prop="avatar" label="头像">
           <template slot-scope="scope">
             <el-image
-              style="width: 60px; height: 60px"
+              style="width: 50px; height: 50px; border: 3px solid #eee; border-radius: .2em;"
               :src="scope.row.avatar">
             </el-image>
           </template>
