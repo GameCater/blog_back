@@ -77,7 +77,9 @@ export default {
           if (status) {
             // 本地存储token
             localStorage.setItem('token', token);
-            // 状态机全局存储用户信息以及登录状态
+            // 会话存储存储用户信息
+            sessionStorage.setItem('user', JSON.stringify(user));
+            // 状态机全局存储用户信息以及登录状态，内存存储，加快读取速度
             this.SWITCH_STATE(user);
             // 跳转主页
             this.$router.replace('/home');

@@ -7,7 +7,15 @@
 
 <script>
 export default {
-
+  created() {
+    console.log('App created');
+    // 刷新页面初始化Vuex
+    if (sessionStorage.user) {
+      this.$store.commit('SWITCH_STATE', Object.assign({}, JSON.parse(sessionStorage.getItem('user'))));
+    } else {
+      this.$store.dispatch('GET_CURRENT_ADMIN');
+    }
+  }
 }
 </script>
 

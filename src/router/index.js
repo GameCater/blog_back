@@ -16,7 +16,6 @@ const routes = [
   // 主页路由
   {
     path: '/home',
-    name: 'home',
     component: Home,
     children: [
       {

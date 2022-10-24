@@ -25,6 +25,10 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    GET_CURRENT_ADMIN(context) {
+      // Vue.prototype.$http.GET('/rest/users')
+      console.log('请求当前登录者信息');
+    }
   },
   modules: {
   }
