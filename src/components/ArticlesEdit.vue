@@ -22,7 +22,7 @@
           </el-form-item>
           <!-- 标签选择 -->
           <el-form-item label="所含标签">
-            <el-select v-model="article.tagsID" multiple>
+            <el-select v-model="article.tags" multiple>
               <el-option
                 v-for="item in tagsList"
                 :key="item._id"
@@ -107,7 +107,7 @@ export default {
       this.article.click = this.id ? this.article.click : 0;
       this.article.comment = this.id ? this.article.comment : 0;
       // 文章作者 不改变原作者
-      this.article.author = this.id ? this.article.author : this.$store.state.USER_INFO._id;
+      // this.article.author = this.id ? this.article.author : this.$store.state.USER_INFO._id;
 
       let res;
       if (this.id) {

@@ -13,7 +13,7 @@
         <el-table-column prop="title" label="文章标题"></el-table-column>
         <el-table-column prop="tagID" label="标签">
           <template slot-scope="scope">
-            <el-tag v-for="(item, index) in scope.row.tagID" :key="index">{{item.name}}</el-tag>
+            <el-tag v-for="(item, index) in scope.row.tags" :key="index">{{item.name}}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="cover" label="封面">
