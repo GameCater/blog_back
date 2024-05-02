@@ -20,32 +20,35 @@ http.interceptors.request.use(function (config) {
 
 // 配置响应拦截器
 http.interceptors.response.use(res => {
-  const { status, message } = res.data;
-  if (!status && message?.includes('token')) {
-    Vue.prototype.$message({
-      type: 'error',
-      message: '身份已失效，请重新登录！'
-    })
-    localStorage.clear();
-    router.replace('/login');
-  }
+  const { code, message } = res.data;
+  // if (message?.includes('token')) {
+  //   Vue.prototype.$message({
+  //     type: 'error',
+  //     message: '身份已失效，请重新登录！'
+  //   })
+  //   localStorage.clear();
+  //   router.replace('/login');
+  // }
+
+  console.log(res);
+
   return res;
 }, err => {
   // 测试：打印响应错误
   console.log(err);
-  if (err.response.data.message) {
-    Vue.prototype.$message({
-      type: 'error',
-      message: err.response.data.message
-    })
+  // if (err.response.data.message) {
+  //   Vue.prototype.$message({
+  //     type: 'error',
+  //     message: err.response.data.message
+  //   })
     
-    // 401请求者未授权
-    if (err.response.status === 401) {
-      // 清理本地缓存
-      localStorage.clear();
-      router.replace('/login');
-    }
-  }
+  //   // 401请求者未授权
+  //   if (err.response.status === 401) {
+  //     // 清理本地缓存
+  //     localStorage.clear();
+  //     router.replace('/login');
+  //   }
+  // }
   
   return Promise.reject(err);
 });

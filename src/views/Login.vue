@@ -69,29 +69,32 @@ export default {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
           // 登录请求
-          const data = await this.$http.POST('/login', {
+          const response = await this.$http.POST('/login', {
             username: this.loginForm.username,
             password: this.loginForm.password
           });
-          const { status, token, message, data: user } = data;
-          if (status) {
+
+          // 成功登录
+          if (response.data) {
+            const { other, token } = response.data;
             // 本地存储token
             localStorage.setItem('token', token);
             // 会话存储存储用户信息
-            sessionStorage.setItem('user', JSON.stringify(user));
+            sessionStorage.setItem('user', JSON.stringify(other));
             // 状态机全局存储用户信息以及登录状态，内存存储，加快读取速度
-            this.SWITCH_STATE(user);
+            this.SWITCH_STATE(other);
             // 跳转主页
             this.$router.replace('/home');
-          } else {
+          }
+          else {
             this.$message({
-              message,
-              type: 'error'
+              message: response.message,
+              type: "error"
             })
           }
         } else {
           this.$message({
-            message: '验证不通过',
+            message: '用户名和密码不能为空',
             type: 'error'
           })
           return false;

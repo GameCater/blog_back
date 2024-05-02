@@ -104,7 +104,7 @@ export default {
       this.count = count;
     },
     async remove(id) {
-      // await this.$http.DELETE(`/rest/articles/${id}`);
+      await this.$http.DELETE(`/rest/articles/${id}`);
       this.fetchAllArticles();
     },
     handleCurrentChange(newPage) {

@@ -75,6 +75,7 @@ export default {
   methods: {
     async getUser() {
       const data = await this.$http.GET(`/rest/users/${this.id}`);
+      console.log(data);
       for (let key in this.users) {
         if (this.users.hasOwnProperty(key)) {
           if (key !== 'password')

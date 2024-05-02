@@ -105,6 +105,9 @@ export default {
   methods: {
     async getUsers() {
       const { data, count } = await this.$http.GET(`/rest/users?page=${this.pageInfo.page}&pageSize=${this.pageInfo.pageSize}`);
+
+      console.log(data);
+      
       this.users = data;
       this.count = count;
     },

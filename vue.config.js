@@ -7,7 +7,7 @@ module.exports = defineConfig({
     port: 8090,
     open: true,
     headers: {
-      "Access-Control-Allow-Origin": "*"
+      // "Access-Control-Allow-Origin": "*"
     },
     // proxy: {
     //   "/api": {
