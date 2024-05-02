@@ -8,6 +8,8 @@ const http = axios.create({
 
 // 配置请求拦截器
 http.interceptors.request.use(function (config) {
+  console.log(config);
+
   // 配置请求头
   if (localStorage.token) {
     config.headers.Authorization = 'Bearer ' + localStorage.getItem('token');
@@ -29,9 +31,6 @@ http.interceptors.response.use(res => {
   //   localStorage.clear();
   //   router.replace('/login');
   // }
-
-  console.log(res);
-
   return res;
 }, err => {
   // 测试：打印响应错误
@@ -60,6 +59,14 @@ http.GET = function (url, params) {
 
 http.POST = function (url, params) {
   return this.post(url, params).then((res) => res.data);
+}
+
+http.POST_FORM = function (url, params) {
+  return this.postForm(url, params).then((res) => res.data);
+}
+
+http.POST_FORM_MULTI = function (url, params) {
+  return this.post(url, params, { headers: { 'Content-Type': 'multipart/form-data' } }).then((res) => res.data);
 }
 
 http.PUT = function (url, params) {
