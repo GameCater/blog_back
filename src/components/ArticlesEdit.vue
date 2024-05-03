@@ -62,6 +62,7 @@
 
 <script>
 import dayjs from 'dayjs';
+import { v4 as uuidv4 } from "uuid";
 export default {
   props: ['id'],
   data() {
@@ -93,69 +94,81 @@ export default {
     // },
     $imgAdd(pos, file) {
       this.imgFiles[pos] = file;
-	  console.log(this.imgFiles);
     },
     $imgDel(pos, file) {
       delete this.imgFiles[pos];
     },
-	async upload() {
-		if (this.imgFiles && Object.keys(this.imgFiles).length) {
-			let formData = new FormData();
-			for (let key in this.imgFiles) {
-				let file = this.imgFiles[key];
-				file.ext = { index: key };
-				formData.append("files", file);
-			}
-			const response = await this.$http.POST_FORM_MULTI("/upload", formData);
-			if (response.code === "200") {
-				const { files } = response.data;
-				for (let i = 0; i < files.length; i ++) {
-					// this.$refs.md.$img2Url();
-				}
-			}
-		}
-	},
-    async save() {
-		await this.upload();
-		
-		// 设置文章生成日期或修改日期
-		this.article.date = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
-		// markdown html格式
-		this.article.content = this.$refs.md.d_render;
-		// markdown 内容
-		this.article.body = this.$refs.md.d_value;
-		// 其他内容
-		this.article.click = this.id ? this.article.click : 0;
-		this.article.comment = this.id ? this.article.comment : 0;
-		// 文章作者 不改变原作者
-		// this.article.author = this.id ? this.article.author : this.$store.state.USER_INFO._id;
+    async upload() {
+      if (this.imgFiles && Object.keys(this.imgFiles).length) {
+        let formData = new FormData();
+        let extraInfoArr = [];
+        for (let key in this.imgFiles) {
+          let file = this.imgFiles[key];
+          formData.append("files", file);
 
-		let res;
-		// if (this.id) {
-		//   // 如果是修改文章
-		//   res= await this.$http.PUT(`/rest/articles/${this.id}`, this.article);
-		// } else {
-		//   // 新增文章
-		//   res = await this.$http.POST('/rest/articles', this.article);
-		// }
-		// if (res) {
-		//   this.$message({
-		//     type: 'success',
-		//     message: this.id ? '修改成功' : '新增成功'
-		//   });
-		// } else {
-		//   this.$message({
-		//     type: 'error',
-		//     message: '出错'
-		//   })
-		// }
-		// // 返回首页
-		// this.$router.replace('/home/articles');
-	},
-	async fetchTags() {
-		const response = await this.$http.GET('/rest/tags');
-		this.tagsList = response.payload.data;
-	}
+          let uuid = uuidv4();
+          let extraInfo = { 
+            uuid,
+            index: key
+          };
+          file.ext = extraInfo;
+          extraInfoArr.push(extraInfo);
+        }
+        formData.append("ext", JSON.stringify(extraInfoArr));
+
+        const response = await this.$http.POST_FORM_MULTI("/upload", formData);
+        if (response.code == 200) {
+          const files = response.payload.data;
+          for (let i = 0; i < files.length; i ++) {
+            let file = files[i];
+            this.$refs.md.$img2Url(file.ext.index, file.serverPath);
+          }
+        }
+      }
+	  },
+    async save() {
+      await this.upload();
+      
+      // 设置文章生成日期或修改日期
+      this.article.date = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
+      // markdown html格式
+      this.article.content = this.$refs.md.d_render;
+      // markdown 内容
+      this.article.body = this.$refs.md.d_value;
+      // 其他内容
+      this.article.click = this.id ? this.article.click : 0;
+      this.article.comment = this.id ? this.article.comment : 0;
+      // 文章作者 不改变原作者
+      // this.article.author = this.id ? this.article.author : this.$store.state.USER_INFO._id;
+
+      console.log(this.article);
+
+      let res;
+      // if (this.id) {
+      //   // 如果是修改文章
+      //   res= await this.$http.PUT(`/rest/articles/${this.id}`, this.article);
+      // } else {
+      //   // 新增文章
+      //   res = await this.$http.POST('/rest/articles', this.article);
+      // }
+      // if (res) {
+      //   this.$message({
+      //     type: 'success',
+      //     message: this.id ? '修改成功' : '新增成功'
+      //   });
+      // } else {
+      //   this.$message({
+      //     type: 'error',
+      //     message: '出错'
+      //   })
+      // }
+      // // 返回首页
+      // this.$router.replace('/home/articles');
+	  },
+    async fetchTags() {
+      const response = await this.$http.GET('/rest/tags');
+      this.tagsList = response.payload.data;
+    }
   },
   created() {
     this.fetchTags();
