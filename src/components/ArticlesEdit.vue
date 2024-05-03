@@ -18,7 +18,7 @@
           </el-form-item>
           <!-- 简介 -->
           <el-form-item label="文章简介">
-            <el-input v-model="article.introduction"></el-input>
+            <el-input v-model="article.desc"></el-input>
           </el-form-item>
           <!-- 标签选择 -->
           <el-form-item label="所含标签">
@@ -46,7 +46,7 @@
         <mavon-editor
           :tabSize="2"
           :boxShadow="false"
-          v-model="article.body" 
+          v-model="article.markdown" 
           ref="md" 
           @imgAdd="$imgAdd" 
           @imgDel="$imgDel">
@@ -77,8 +77,16 @@ export default {
   },
   methods: {
     async fetchArticle() {
-      const data = await this.$http.GET(`/rest/articles/${this.id}`);
-      this.article = data;
+      const { code, payload, message } = await this.$http.GET(`/rest/articles/${this.id}`);
+      if (code == 200) {
+        this.article = payload.data[0];
+      }
+      else {
+        this.$message({
+          type: "error",
+          message: message
+        })
+      }
     },
     // afterUpload(res, file) {
     //   if (file.status === 'success') {
@@ -128,42 +136,35 @@ export default {
 	  },
     async save() {
       await this.upload();
-      
-      // 设置文章生成日期或修改日期
-      this.article.date = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
-      // markdown html格式
-      this.article.content = this.$refs.md.d_render;
-      // markdown 内容
-      this.article.body = this.$refs.md.d_value;
-      // 其他内容
-      this.article.click = this.id ? this.article.click : 0;
-      this.article.comment = this.id ? this.article.comment : 0;
-      // 文章作者 不改变原作者
-      // this.article.author = this.id ? this.article.author : this.$store.state.USER_INFO._id;
 
-      console.log(this.article);
+      const modifiedTime = Date.now();
+      const markdown = this.$refs.md.d_value;
+      const html = this.$refs.md.d_render;
+      const click = this.id ? this.article.click : 0;
+      const author = this.$store.state.USER_INFO._id;
+      this.article = Object.assign(this.article, { modifiedTime, markdown, html, click, author });
 
       let res;
-      // if (this.id) {
-      //   // 如果是修改文章
-      //   res= await this.$http.PUT(`/rest/articles/${this.id}`, this.article);
-      // } else {
-      //   // 新增文章
-      //   res = await this.$http.POST('/rest/articles', this.article);
-      // }
-      // if (res) {
-      //   this.$message({
-      //     type: 'success',
-      //     message: this.id ? '修改成功' : '新增成功'
-      //   });
-      // } else {
-      //   this.$message({
-      //     type: 'error',
-      //     message: '出错'
-      //   })
-      // }
-      // // 返回首页
-      // this.$router.replace('/home/articles');
+      if (this.id) {
+        // 如果是修改文章
+        res= await this.$http.PUT(`/rest/articles/${this.id}`, this.article);
+      } else {
+        // 新增文章
+        res = await this.$http.POST('/rest/articles', this.article);
+      }
+      if (res) {
+        this.$message({
+          type: 'success',
+          message: this.id ? '修改成功' : '新增成功'
+        });
+      } else {
+        this.$message({
+          type: 'error',
+          message: '出错'
+        })
+      }
+      // 返回首页
+      this.$router.replace('/home/articles');
 	  },
     async fetchTags() {
       const response = await this.$http.GET('/rest/tags');

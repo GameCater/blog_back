@@ -16,15 +16,15 @@
             <el-tag v-for="(item, index) in scope.row.tags" :key="index">{{item.name}}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="cover" label="封面">
+        <!-- <el-table-column prop="cover" label="封面">
           <template slot-scope="scope">
             <el-image
               style="width: 50px; height: 50px; border: 3px solid #eee; border-radius: .2em;"
               :src="scope.row.cover">
             </el-image>
           </template>
-        </el-table-column>
-        <el-table-column prop="date" label="更新日期"></el-table-column>
+        </el-table-column> -->
+        <el-table-column prop="modifiedTime" label="更新日期"></el-table-column>
         <el-table-column fixed="right" label="操作" width="180">
           <template slot-scope="scope">
             <el-button
@@ -99,9 +99,17 @@ export default {
   },
   methods: {
     async fetchAllArticles() {
-      const { data, count } = await this.$http.GET(`/rest/articles?page=${this.pageInfo.page}&pageSize=${this.pageInfo.pageSize}`);
-      this.articles = data;
-      this.count = count;
+      const { code, payload, message } = await this.$http.GET(`/rest/articles?page=${this.pageInfo.page}&pageSize=${this.pageInfo.pageSize}`);
+      if (code == 200) {
+        this.articles = payload.data;
+        this.count = payload.data.length;
+      }
+      else {
+        this.$message({
+          type: "error",
+          message: message
+        })
+      }
     },
     async remove(id) {
       await this.$http.DELETE(`/rest/articles/${id}`);
