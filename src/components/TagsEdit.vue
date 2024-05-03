@@ -10,9 +10,12 @@
     <!-- 卡片视图 -->
     <el-card :body-style="{ padding: '30px' }" class="main_view">
       <!-- 表单部分 -->
-      <el-form ref="form" label-width="80px" :model="tags">
+      <el-form ref="form" label-width="80px" :model="tag">
         <el-form-item label="标签名称">
-          <el-input v-model="tags.name"></el-input>
+          <el-input v-model="tag.name"></el-input>
+        </el-form-item>
+        <el-form-item label="标签描述">
+          <el-input v-model="tag.desc"></el-input>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="save" class="btn">保存</el-button>
@@ -23,24 +26,22 @@
 </template>
 
 <script>
-import dayjs from 'dayjs';
 export default {
   props: ['id'],
   data() {
     return {
-      tags: {}
+      tag: {}
     }
   },
   methods: {
     async save() {
-      this.tags.date = dayjs(new Date()).format('YYYY-MM-DD HH:mm:ss');
-      
       let res;
       if (this.id) {
-        this.$http.PUT(`/rest/tags/${this.id}`, this.tags);
+        res = await this.$http.PUT(`/rest/tags/${this.id}`, this.tag);
       } else {
-        this.$http.POST('/rest/tags', this.tags);
+        res = await this.$http.POST('/rest/tags', this.tag);
       }
+      console.log(res);
       this.$message({
         type: 'success',
         message: this.id ? '更新成功' : '新增成功'
@@ -48,10 +49,27 @@ export default {
 
       this.$router.replace('/home/tags');
     },
+    async fetchTag() {
+      if (this.id) {
+        const { code, message, payload } = await this.$http.GET(`/rest/tags/${this.id}`);
+        if (code == 200) {
+          this.tag = payload.data;
+        }
+        else {
+          this.$message({
+            type: "error",
+            message: message
+          })
+        }
+      }
+    },
     beforeDestroy() {
       this.$refs['form'].resetFields();
     },
   },
+  created() {
+    this.fetchTag();
+  }
 }
 </script>
 

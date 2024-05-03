@@ -11,7 +11,8 @@
       <el-table :data="tags">
         <el-table-column prop="_id" label="ID" width="240"></el-table-column>
         <el-table-column prop="name" label="标签名称"></el-table-column>
-        <el-table-column prop="date" label="更新日期"></el-table-column>
+        <el-table-column prop="desc" label="标签描述"></el-table-column>
+        <el-table-column prop="modifiedTime" label="更新日期"></el-table-column>
         <el-table-column fixed="right" label="操作" width="180">
           <template slot-scope="scope">
             <el-button
@@ -50,13 +51,14 @@
       </el-table>
       <!-- 分页 -->
       <el-pagination
-        v-if="tags?.length"
+        v-if="count > 0"
         class="pagination"
         background
         :pager-count="9"
         :page-size="pageInfo.pageSize"
-        layout="prev, pager, next"
         :total="count"
+        :current-page="pageInfo.page"
+        layout="prev, pager, next"
         @current-change="handleCurrentChange"
         @size-change="handleSizeChange">
       </el-pagination>
@@ -71,7 +73,7 @@ export default {
       tags: [],
       pageInfo: {
         page: 1,
-        pageSize: 2
+        pageSize: 20
       },
       count: 0
     }
@@ -92,13 +94,23 @@ export default {
       this.pageInfo.pageSize = newSize;
     },
     async fetchTags() {
-      const { data, count } = await this.$http.GET(`/rest/tags?page=${this.pageInfo.page}&pageSize=${this.pageInfo.pageSize}`);
-      this.tags = data;
-      this.count = count;
+      const { code, message, payload } = await this.$http.GET(`/rest/tags?page=${this.pageInfo.page}&pageSize=${this.pageInfo.pageSize}`);
+      if (code == 200) {
+        this.tags = payload.data;
+        this.count = payload.total;
+      }
+      else {
+        this.$message({
+          type: "error",
+          message: message
+        })
+      }
     },
     async remove(id) {
       await this.$http.DELETE(`/rest/tags/${id}`);
-      this.fetchTags();
+      await this.fetchTags();
+      let targetPage = Math.ceil(this.count / this.pageInfo.pageSize);
+      this.pageInfo.page = targetPage;
     }
   },
   mounted() {
