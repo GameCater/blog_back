@@ -79,7 +79,7 @@ export default {
     async fetchArticle() {
       const { code, payload, message } = await this.$http.GET(`/rest/articles/${this.id}`);
       if (code == 200) {
-        this.article = payload.data[0];
+        this.article = payload.data;
       }
       else {
         this.$message({

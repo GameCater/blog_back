@@ -63,13 +63,14 @@
       </el-table>
       <!-- 分页 -->
       <el-pagination
-        v-if="articles?.length"
+        v-if="count > 0"
         class="pagination"
         background
         :pager-count="9"
         :page-size="pageInfo.pageSize"
-        layout="prev, pager, next"
         :total="count"
+        :current-page="pageInfo.page"
+        layout="prev, pager, next"
         @current-change="handleCurrentChange"
         @size-change="handleSizeChange">
       </el-pagination>
@@ -84,7 +85,7 @@ export default {
       articles: [],
       pageInfo: {
         page: 1,
-        pageSize: 2
+        pageSize: 20
       },
       count: 0
     }
@@ -102,7 +103,7 @@ export default {
       const { code, payload, message } = await this.$http.GET(`/rest/articles?page=${this.pageInfo.page}&pageSize=${this.pageInfo.pageSize}`);
       if (code == 200) {
         this.articles = payload.data;
-        this.count = payload.data.length;
+        this.count = payload.total;
       }
       else {
         this.$message({
@@ -113,7 +114,9 @@ export default {
     },
     async remove(id) {
       await this.$http.DELETE(`/rest/articles/${id}`);
-      this.fetchAllArticles();
+      await this.fetchAllArticles();
+      let targetPage = Math.ceil(this.count / this.pageInfo.pageSize);
+      this.pageInfo.page = targetPage;
     },
     handleCurrentChange(newPage) {
       this.pageInfo.page = newPage;
