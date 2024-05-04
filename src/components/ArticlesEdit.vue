@@ -29,10 +29,11 @@
                     </el-form-item>
                     <!-- 文件导入 -->
                     <el-form-item label="导入md文件">
-                        <el-upload name="files" :limit="1" :data="{ store: false }"
-                            :action="$http.defaults.baseURL + '/upload'" :on-success="afterUpload"
-                            :on-error="handleUploadError" :headers="authorization" :before-upload="beforeUpload">
-                            <el-button size="small" type="primary" class="btn">点击上传</el-button>
+                        <el-upload ref="upload" name="files" :data="{ action: 'importMarkdown' }" multiple action="#"
+                            :on-success="afterUpload" :on-error="handleUploadError" :headers="authorization"
+                            :before-upload="beforeUpload" :on-remove="onFileRemove" :on-change="onFileChange"
+                            :auto-upload="false" :file-list="form.fileList">
+                            <el-button size="small" type="primary" class="btn" @click="onUploadClick">导入</el-button>
                         </el-upload>
                     </el-form-item>
                 </div>
@@ -51,6 +52,7 @@
 
 <script>
 import { v4 as uuidv4 } from "uuid";
+import { marked } from "marked";
 export default {
     props: ['id'],
     data() {
@@ -62,18 +64,77 @@ export default {
                 Authorization: 'Bearer ' + localStorage.token
             },
             imgFiles: {},
+            form: {
+                fileList: []
+            }
         }
     },
     methods: {
-        beforeUpload(file, fileList) {
-            let fileType = file.name.split('.')[1];
-            if (fileType !== "md") {
-                this.$message({
-                    type: "warning",
-                    message: "只能上传 markdown 文件！"
-                })
-                return false;
+        onUploadClick() {
+            this.form.fileList = [];
+            this.$nextTick(() => {
+                this.$refs.upload.$children[0].$refs.input.webkitdirectory = true;
+            })
+        },
+        onFileRemove(file, fileList, name) {
+            let idx = this.form.fileList.indexOf(file);
+            this.form.fileList.splice(idx, 1);
+        },
+        async onFileChange(file, fileList, name) {
+            this.form.fileList.push(file);
+            let total = this.$refs.upload.$refs["upload-inner"].$refs.input.files.length;
+            let isAllUploaded = this.form.fileList.length === total;
+            if (isAllUploaded) {
+                // 过滤掉非法文件
+                let files = this.form.fileList;
+                let mdFile;
+                let imageFiles = [];
+                for (let i = 0; i < files.length; i++) {
+                    let file = files[i];
+                    let type = file.name.split('.')[1];
+                    let isMd = type === "md";
+                    let isImage = file.raw.type?.indexOf("image/") != -1;
+                    if (isMd) {
+                        mdFile = file.raw;
+                    }
+                    else if (isImage) {
+                        imageFiles.push(file.raw);
+                    }
+                }
+                // 判断必要文件是否存在
+                if (!mdFile) {
+                    this.$message({
+                        type: "error",
+                        message: "必须上传markdown文件！"
+                    })
+                    return;
+                }
+
+                // 先上传图片
+                let serverFiles;
+                if (imageFiles.length) {
+                    serverFiles = await this.uploadImagesForImportedMarkdown(imageFiles);
+                }
+
+                // 处理markdown内容
+                let md = await mdFile.text();
+                if (md) {
+                    // 替换所有本地图片地址为服务器图片地址
+                    const updatedContent = md.replace(/\!\[(.*?)\]\((.*?)\)/g, (match, altText, imagePath) => {
+                        let targetFile = serverFiles.find(file => file.originalname === imagePath);
+                        let serverPath = imagePath;
+                        if (targetFile) {
+                            serverPath = targetFile.serverPath;
+                        }
+                        return `![${altText}](${serverPath})`;
+                    });
+
+                    this.article.markdown = updatedContent;
+                }
             }
+        },
+        beforeUpload(file, fileList) {
+            return false;
         },
         async fetchArticle() {
             const { code, payload, message } = await this.$http.GET(`/rest/articles/${this.id}`);
@@ -92,13 +153,38 @@ export default {
 
         },
         handleUploadError(err, file) {
-            console.log(err);
+            // console.log(err);
         },
         $imgAdd(pos, file) {
             this.imgFiles[pos] = file;
         },
         $imgDel(pos, file) {
             delete this.imgFiles[pos];
+        },
+        async uploadImagesForImportedMarkdown(files) {
+            let formData = new FormData();
+            let extraInfoArr = [];
+            for (let i = 0; i < files.length; i++) {
+                let file = files[i];
+                formData.append("files", file);
+
+                let uuid = uuidv4();
+                let extraInfo = {
+                    uuid,
+                    index: i
+                };
+                file.ext = extraInfo;
+                extraInfoArr.push(extraInfo);
+            }
+            formData.append("ext", JSON.stringify(extraInfoArr));
+            formData.append("action", "saveImageFromMarkdown");
+
+            const response = await this.$http.POST_FORM_MULTI("/upload", formData);
+            if (response.code == 200) {
+                const files = response.payload.data;
+                return files;
+            }
+            return [];
         },
         async upload() {
             if (this.imgFiles && Object.keys(this.imgFiles).length) {
